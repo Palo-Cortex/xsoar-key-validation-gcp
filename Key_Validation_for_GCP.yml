@@ -1,0 +1,262 @@
+id: c51653c1-3e27-41e8-8d0a-144474c2971f
+version: 6
+name: Key Validation for GCP
+starttaskid: "0"
+tasks:
+  "0":
+    id: "0"
+    taskid: 20f5d848-9f62-4376-869a-a95fd98c18ba
+    type: start
+    task:
+      id: 20f5d848-9f62-4376-869a-a95fd98c18ba
+      version: -1
+      name: ""
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "1"
+    separatecontext: false
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 50
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+  "1":
+    id: "1"
+    taskid: d721eeb7-cc4f-46b6-878f-21509436ee24
+    type: regular
+    task:
+      id: d721eeb7-cc4f-46b6-878f-21509436ee24
+      version: -1
+      name: Get all keys
+      description: Lists all CryptoKeys across all KeyRings in a given location.
+      script: '|||google-kms-list-all-keys'
+      type: regular
+      iscommand: true
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "2"
+    scriptarguments:
+      all: {}
+      key_state: {}
+      location: {}
+    separatecontext: false
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 195
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+  "2":
+    id: "2"
+    taskid: 82127a9c-84ec-4bea-8ef2-2f2ecfc64116
+    type: regular
+    task:
+      id: 82127a9c-84ec-4bea-8ef2-2f2ecfc64116
+      version: -1
+      name: Get Time
+      description: |
+        Retrieves the current date and time.
+      scriptName: GetTime
+      type: regular
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "6"
+    scriptarguments:
+      contextKey: {}
+      date: {}
+      dateFormat:
+        simple: ISO
+      daysAgo: {}
+      hoursAgo: {}
+      minutesAgo: {}
+      monthsAgo: {}
+      yearsAgo: {}
+    separatecontext: false
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 370
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+  "3":
+    id: "3"
+    taskid: 320469fc-9633-4345-8cc5-f7c2adabbd0d
+    type: condition
+    task:
+      id: 320469fc-9633-4345-8cc5-f7c2adabbd0d
+      version: -1
+      name: Validate Age
+      type: condition
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#default#':
+      - "5"
+      "yes":
+      - "4"
+    separatecontext: false
+    conditions:
+    - label: "yes"
+      condition:
+      - - operator: greaterThan
+          left:
+            value:
+              simple: Time.Difference
+            iscontext: true
+          right:
+            value:
+              simple: "10"
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 720
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+  "4":
+    id: "4"
+    taskid: 5acc1234-a39e-4302-8aab-2cddceef279f
+    type: regular
+    task:
+      id: 5acc1234-a39e-4302-8aab-2cddceef279f
+      version: -1
+      name: disable key
+      description: Disables a CryptoKeyVersion of a given CryptoKey.
+      script: '|||google-kms-disable-key'
+      type: regular
+      iscommand: true
+      brand: ""
+    scriptarguments:
+      crypto_key:
+        complex:
+          root: GoogleKMS
+          accessor: CryptoKey.Name
+      crypto_key_version:
+        simple: default
+      key_ring:
+        simple: ${GoogleKMS.CryptoKey.[].KeyRing}
+      location: {}
+    separatecontext: false
+    view: |-
+      {
+        "position": {
+          "x": 50,
+          "y": 895
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+  "5":
+    id: "5"
+    taskid: c5b854a3-0644-42c2-8a0f-5b443924fd9e
+    type: regular
+    task:
+      id: c5b854a3-0644-42c2-8a0f-5b443924fd9e
+      version: -1
+      name: enable key
+      description: Enables a CryptoKeyVersion of a given CryptoKey.
+      script: '|||google-kms-enable-key'
+      type: regular
+      iscommand: true
+      brand: ""
+    scriptarguments:
+      crypto_key:
+        simple: ${GoogleKMS.CryptoKey.Name}
+      crypto_key_version:
+        simple: default
+      key_ring:
+        simple: ${GoogleKMS.CryptoKey.[].KeyRing}
+      location: {}
+    separatecontext: false
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 895
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+  "6":
+    id: "6"
+    taskid: bfff6137-7d4c-4092-8695-ca0f7f52e212
+    type: regular
+    task:
+      id: bfff6137-7d4c-4092-8695-ca0f7f52e212
+      version: -1
+      name: calculate time difference
+      description: Calculate the time difference, in minutes
+      scriptName: CalculateTimeDifference
+      type: regular
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "3"
+    scriptarguments:
+      end_time:
+        simple: ${TimeNow}
+      start_time:
+        simple: ${GoogleKMS.CryptoKey.[].CreationTime}
+    separatecontext: false
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 545
+        }
+      }
+    note: false
+    timertriggers: []
+    ignoreworker: false
+    skipunavailable: false
+    quietmode: 0
+view: |-
+  {
+    "linkLabelsPosition": {},
+    "paper": {
+      "dimensions": {
+        "height": 940,
+        "width": 810,
+        "x": 50,
+        "y": 50
+      }
+    }
+  }
+inputs: []
+outputs: []
